@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#00B2E3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trip Log">
+<title>Trip Log — Alison Slade</title>
+<link rel="manifest" href="manifest-alison.json">
+<link rel="icon" type="image/png" href="icon-alison-192.png">
+<link rel="apple-touch-icon" href="icon-alison-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', -apple-system, sans-serif; background: #F2F3F0; color: #1A1D21; min-height: 100vh; padding-bottom: 48px; }
+  input, select, button { font-family: 'Barlow', -apple-system, sans-serif; }
+  input:focus, select:focus, button:focus-visible { outline: 3px solid #FF671D; outline-offset: 1px; }
+
+  header { background: #00B2E3; color: #fff; padding: 20px 16px 18px; border-bottom: 5px solid #FF671D; }
+  .header-inner { max-width: 560px; margin: 0 auto; }
+  .sign-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; letter-spacing: 2px; line-height: 1; }
+  .sign-sub { font-size: 13px; opacity: .85; margin-top: 4px; font-weight: 500; }
+  .odo-row { display: flex; gap: 16px; margin-top: 16px; }
+  .odo-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; display: block; }
+  .odo-lbl { font-size: 12px; opacity: .85; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; display: block; }
+  .odo-div { width: 1px; background: rgba(255,255,255,.35); }
+
+  nav { display: flex; max-width: 560px; margin: 0 auto; background: #fff; border-bottom: 1px solid #D8DAD5; position: sticky; top: 0; z-index: 5; }
+  nav button { flex: 1; padding: 16px 4px; font-size: 16px; font-weight: 600; border: none; background: transparent; color: #5A6068; border-bottom: 4px solid transparent; cursor: pointer; }
+  nav button.on { color: #007DA3; border-bottom-color: #FF671D; background: #FDFDFB; }
+
+  main { max-width: 560px; margin: 0 auto; padding: 20px 16px; }
+  .field { margin-bottom: 18px; }
+  label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #3A3F45; text-transform: uppercase; letter-spacing: .4px; }
+  label .opt { font-weight: 400; text-transform: none; color: #8A8F98; }
+  .input { width: 100%; padding: 14px 12px; font-size: 18px; border: 1.5px solid #C7CAC4; border-radius: 10px; background: #fff; color: #1A1D21; -webkit-appearance: none; appearance: none; }
+  select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%235A6068' stroke-width='2' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
+  .big-num { font-size: 30px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .hidden { display: none; }
+
+  .pay-row { display: flex; gap: 10px; }
+  .pay-btn { flex: 1; padding: 16px 8px; font-size: 17px; font-weight: 600; border-radius: 10px; border: 1.5px solid #C7CAC4; background: #fff; color: #5A6068; cursor: pointer; }
+  .pay-btn.fleet-on { background: #FF671D; border-color: #D14F08; color: #fff; }
+  .pay-btn.personal-on { background: #3A3F45; border-color: #3A3F45; color: #fff; }
+
+  .save-btn { width: 100%; padding: 18px; font-size: 19px; font-weight: 700; color: #fff; background: #FF671D; border: none; border-radius: 12px; cursor: pointer; margin-top: 4px; }
+  .save-btn.navy { background: #131414; margin-bottom: 6px; }
+  .hint { font-size: 13px; color: #6A7078; margin-top: 10px; text-align: center; }
+  .empty { font-size: 15px; color: #6A7078; text-align: center; padding: 24px 8px; }
+
+  .summary { background: #fff; border: 1.5px solid #D8DAD5; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
+  .sum-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 16px; border-bottom: 1px dashed #E5E7E2; }
+  .sum-row strong { font-variant-numeric: tabular-nums; }
+
+  .entry { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #DDDFDA; border-left: 6px solid #00B2E3; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+  .entry.fuel-fleet { border-left-color: #FF671D; }
+  .entry.fuel-personal { border-left-color: #8A8F98; }
+  .entry .body { flex: 1; }
+  .e-top { font-size: 13px; color: #6A7078; margin-bottom: 2px; }
+  .e-main { font-size: 17px; font-weight: 600; }
+  .e-note { font-size: 14px; color: #5A6068; margin-top: 2px; }
+  .del { border: none; background: transparent; color: #B0B4AC; font-size: 18px; padding: 8px 10px; cursor: pointer; }
+
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1A1D21; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 15px; font-weight: 500; box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 50; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="sign-title">TRIP LOG</div>
+    <div class="sign-sub">Alison Slade · MBI Brands</div>
+    <div class="odo-row">
+      <div><span class="odo-num" id="odoKm">0</span><span class="odo-lbl">km this month</span></div>
+      <div class="odo-div"></div>
+      <div><span class="odo-num" id="odoFuel">$0</span><span class="odo-lbl">fleet card fuel</span></div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button id="tabTrip" class="on" onclick="setTab('trip')">Log a trip</button>
+  <button id="tabFuel" onclick="setTab('fuel')">Log fuel</button>
+  <button id="tabHistory" onclick="setTab('history')">History</button>
+</nav>
+
+<main>
+  <!-- TRIP -->
+  <section id="paneTrip">
+    <div class="field"><label>Date</label><input class="input" type="date" id="tDate"></div>
+    <div class="field">
+      <label>From</label>
+      <select class="input" id="tFrom" onchange="toggleNew('tFrom')"></select>
+      <input class="input hidden" id="tFromNew" placeholder="Type the place name" style="margin-top:8px">
+    </div>
+    <div class="field">
+      <label>To</label>
+      <select class="input" id="tTo" onchange="toggleNew('tTo')"></select>
+      <input class="input hidden" id="tToNew" placeholder="Type the place name" style="margin-top:8px">
+    </div>
+    <div class="field"><label>Kilometres driven</label><input class="input big-num" type="number" inputmode="decimal" placeholder="0" id="tKm"></div>
+    <div class="field"><label>Reason / what was picked up <span class="opt">(optional)</span></label><input class="input" id="tNote" placeholder="e.g. fryer parts for Carbonear"></div>
+    <button class="save-btn" onclick="addTrip()">Save trip</button>
+    <p class="hint">After saving, the next trip starts from where this one ended.</p>
+  </section>
+
+  <!-- FUEL -->
+  <section id="paneFuel" class="hidden">
+    <div class="field"><label>Date</label><input class="input" type="date" id="fDate"></div>
+    <div class="field"><label>Amount ($)</label><input class="input big-num" type="number" inputmode="decimal" placeholder="0.00" id="fAmt"></div>
+    <div class="field"><label>Litres <span class="opt">(optional)</span></label><input class="input" type="number" inputmode="decimal" placeholder="0" id="fLitres"></div>
+    <div class="field">
+      <label>Paid with</label>
+      <div class="pay-row">
+        <button class="pay-btn fleet-on" id="payFleet" onclick="setPay('fleet')">Fleet card</button>
+        <button class="pay-btn" id="payPersonal" onclick="setPay('personal')">Personal</button>
+      </div>
+    </div>
+    <div class="field"><label>Station / location <span class="opt">(optional)</span></label><input class="input" id="fPlace" placeholder="e.g. Irving, Whitbourne"></div>
+    <button class="save-btn" onclick="addFuel()">Save fuel purchase</button>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="paneHistory" class="hidden">
+    <div class="field"><label>Month</label><select class="input" id="hMonth" onchange="renderHistory()"></select></div>
+    <div class="summary" id="hSummary"></div>
+    <button class="save-btn navy" onclick="shareCSV()">Send / share CSV for this month</button>
+    <button class="save-btn navy" onclick="downloadCSV()">Download CSV for this month</button>
+    <p class="hint">Send the CSV to your DO when documentation is requested. Export at least monthly — it's your backup too.</p>
+    <div id="hList"></div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+const SEED_PLACES = [
+  "1010 - Avalon Mall","1015 - 61 Torbay Rd","1043 - Manuels","1046 - Kelligrews",
+  "1048 - Paradise","1049 - Office/Training Centre","1050 - Whitbourne","1075 - Holyrood",
+  "1085 - Gander","1088 - Botwood","1120 - Torbay","1135 - Bonavista","1140 - Freshwater Rd",
+  "1145 - 571 Torbay Rd","1155 - Bay Roberts","1162 - Carbonear","1167 - MUN"
+];
+const KEY = "alisonTripLog";
+let data = { trips: [], fuel: [], places: SEED_PLACES.slice() };
+let payMode = "fleet";
+let toastTimer = null;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      data = { trips: p.trips || [], fuel: p.fuel || [], places: p.places || SEED_PLACES.slice() };
+    }
+  } catch (e) {}
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(data)); }
+  catch (e) { toast("Couldn't save — storage may be blocked"); }
+}
+
+const todayStr = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); };
+const monthKey = s => s.slice(0,7);
+const fmtDate = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("en-CA",{weekday:"short",month:"short",day:"numeric"}); };
+const fmtMonth = mk => { const [y,m] = mk.split("-").map(Number); return new Date(y,m-1,1).toLocaleDateString("en-CA",{month:"long",year:"numeric"}); };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function fillPlaceSelect(id, keep) {
+  const sel = document.getElementById(id);
+  const cur = keep !== undefined ? keep : sel.value;
+  sel.innerHTML = '<option value="">Choose…</option>' +
+    data.places.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join("") +
+    '<option value="__new__">+ Add a new place</option>';
+  if (cur && (data.places.includes(cur) || cur === "__new__")) sel.value = cur;
+}
+function toggleNew(id) {
+  document.getElementById(id + "New").classList.toggle("hidden", document.getElementById(id).value !== "__new__");
+}
+function resolvePlace(id) {
+  const v = document.getElementById(id).value;
+  return v === "__new__" ? document.getElementById(id + "New").value.trim() : v;
+}
+
+function setTab(t) {
+  ["Trip","Fuel","History"].forEach(k => {
+    document.getElementById("pane"+k).classList.toggle("hidden", t !== k.toLowerCase());
+    document.getElementById("tab"+k).classList.toggle("on", t === k.toLowerCase());
+  });
+  if (t === "history") { fillMonths(); renderHistory(); }
+}
+function setPay(m) {
+  payMode = m;
+  document.getElementById("payFleet").className = "pay-btn" + (m==="fleet" ? " fleet-on" : "");
+  document.getElementById("payPersonal").className = "pay-btn" + (m==="personal" ? " personal-on" : "");
+}
+
+function addTrip() {
+  const from = resolvePlace("tFrom"), to = resolvePlace("tTo");
+  const km = parseFloat(document.getElementById("tKm").value);
+  const date = document.getElementById("tDate").value || todayStr();
+  if (!from || !to) { toast("Pick where you started and ended"); return; }
+  if (!km || km <= 0) { toast("Enter the kms driven"); return; }
+  [from, to].forEach(p => { if (!data.places.includes(p)) data.places.push(p); });
+  data.trips.push({ id: Date.now(), date, from, to, km, note: document.getElementById("tNote").value.trim() });
+  save();
+  fillPlaceSelect("tFrom", from === to ? to : to); // chain: next leg starts where this ended
+  document.getElementById("tFromNew").value = ""; document.getElementById("tFromNew").classList.add("hidden");
+  fillPlaceSelect("tTo", ""); document.getElementById("tToNew").value = ""; document.getElementById("tToNew").classList.add("hidden");
+  document.getElementById("tFrom").value = to;
+  document.getElementById("tKm").value = ""; document.getElementById("tNote").value = "";
+  updateOdo();
+  toast("Saved: " + from + " → " + to + ", " + km + " km");
+}
+
+function addFuel() {
+  const amt = parseFloat(document.getElementById("fAmt").value);
+  const date = document.getElementById("fDate").value || todayStr();
+  if (!amt || amt <= 0) { toast("Enter the dollar amount"); return; }
+  data.fuel.push({
+    id: Date.now(), date, amount: amt,
+    litres: parseFloat(document.getElementById("fLitres").value) || null,
+    payment: payMode, place: document.getElementById("fPlace").value.trim()
+  });
+  save();
+  document.getElementById("fAmt").value = ""; document.getElementById("fLitres").value = ""; document.getElementById("fPlace").value = "";
+  updateOdo();
+  toast("Saved: $" + amt.toFixed(2) + (payMode === "fleet" ? " on fleet card" : " personal"));
+}
+
+function delEntry(kind, id) {
+  if (!confirm("Delete this entry?")) return;
+  data[kind] = data[kind].filter(e => e.id !== id);
+  save(); updateOdo(); renderHistory();
+}
+
+function updateOdo() {
+  const cm = monthKey(todayStr());
+  const km = data.trips.filter(t => monthKey(t.date) === cm).reduce((s,t) => s + t.km, 0);
+  const fl = data.fuel.filter(f => monthKey(f.date) === cm && f.payment === "fleet").reduce((s,f) => s + f.amount, 0);
+  document.getElementById("odoKm").textContent = km.toFixed(0);
+  document.getElementById("odoFuel").textContent = "$" + fl.toFixed(0);
+}
+
+function fillMonths() {
+  const sel = document.getElementById("hMonth");
+  const cur = sel.value;
+  let months = Array.from(new Set(data.trips.concat(data.fuel).map(e => monthKey(e.date)))).sort().reverse();
+  if (!months.length) months = [monthKey(todayStr())];
+  sel.innerHTML = months.map(m => `<option value="${m}">${fmtMonth(m)}</option>`).join("");
+  sel.value = months.includes(cur) ? cur : months[0];
+}
+
+function monthData() {
+  const mk = document.getElementById("hMonth").value;
+  const byDate = (a,b) => b.date.localeCompare(a.date) || b.id - a.id;
+  return {
+    mk,
+    trips: data.trips.filter(t => monthKey(t.date) === mk).sort(byDate),
+    fuel: data.fuel.filter(f => monthKey(f.date) === mk).sort(byDate)
+  };
+}
+
+function renderHistory() {
+  const { mk, trips, fuel } = monthData();
+  const km = trips.reduce((s,t) => s + t.km, 0);
+  const fleet = fuel.filter(f => f.payment === "fleet").reduce((s,f) => s + f.amount, 0);
+  const personal = fuel.filter(f => f.payment === "personal").reduce((s,f) => s + f.amount, 0);
+  document.getElementById("hSummary").innerHTML =
+    `<div class="sum-row"><span>Total driven</span><strong>${km.toFixed(1)} km</strong></div>` +
+    `<div class="sum-row"><span>Fuel — fleet card</span><strong>$${fleet.toFixed(2)}</strong></div>` +
+    `<div class="sum-row"><span>Fuel — personal</span><strong>$${personal.toFixed(2)}</strong></div>` +
+    `<div class="sum-row"><span>Trips logged</span><strong>${trips.length}</strong></div>`;
+  let html = "";
+  if (!trips.length && !fuel.length) html = `<p class="empty">Nothing logged for ${fmtMonth(mk)} yet. Trips and fuel you save will show up here.</p>`;
+  html += trips.map(t =>
+    `<div class="entry"><div class="body"><div class="e-top">${fmtDate(t.date)} · <strong>${t.km} km</strong></div>` +
+    `<div class="e-main">${esc(t.from)} → ${esc(t.to)}</div>` +
+    (t.note ? `<div class="e-note">${esc(t.note)}</div>` : "") +
+    `</div><button class="del" onclick="delEntry('trips',${t.id})" aria-label="Delete trip">✕</button></div>`).join("");
+  html += fuel.map(f =>
+    `<div class="entry ${f.payment === "fleet" ? "fuel-fleet" : "fuel-personal"}"><div class="body">` +
+    `<div class="e-top">${fmtDate(f.date)} · Fuel</div>` +
+    `<div class="e-main">$${f.amount.toFixed(2)}${f.litres ? " · " + f.litres + " L" : ""} · ${f.payment === "fleet" ? "Fleet card" : "Personal"}</div>` +
+    (f.place ? `<div class="e-note">${esc(f.place)}</div>` : "") +
+    `</div><button class="del" onclick="delEntry('fuel',${f.id})" aria-label="Delete fuel entry">✕</button></div>`).join("");
+  document.getElementById("hList").innerHTML = html;
+}
+
+function buildCSV() {
+  const { mk, trips, fuel } = monthData();
+  const km = trips.reduce((s,t) => s + t.km, 0);
+  const fleet = fuel.filter(f => f.payment === "fleet").reduce((s,f) => s + f.amount, 0);
+  const personal = fuel.filter(f => f.payment === "personal").reduce((s,f) => s + f.amount, 0);
+  const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+  const rows = [["Date","Type","From","To","KM","Fuel $","Litres","Payment","Note / Location"]];
+  const combined = trips.map(t => [t.date,"Trip",t.from,t.to,t.km,"","","",t.note])
+    .concat(fuel.map(f => [f.date,"Fuel","","","",f.amount.toFixed(2),f.litres ?? "",f.payment === "fleet" ? "Fleet card" : "Personal",f.place]))
+    .sort((a,b) => a[0].localeCompare(b[0]));
+  rows.push(...combined, [],
+    ["Totals","","","",km.toFixed(1),(fleet+personal).toFixed(2),"","Fleet: $"+fleet.toFixed(2)+" / Personal: $"+personal.toFixed(2),""]);
+  return { mk, csv: rows.map(r => r.map(q).join(",")).join("\n") };
+}
+
+async function shareCSV() {
+  const { mk, csv } = buildCSV();
+  const file = new File([csv], "mileage-log-" + mk + ".csv", { type: "text/csv" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: "Mileage log " + mk }); return; }
+    catch (e) { if (e.name === "AbortError") return; }
+  }
+  downloadCSV();
+}
+
+function downloadCSV() {
+  const { mk, csv } = buildCSV();
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = "mileage-log-" + mk + ".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast("CSV downloaded");
+}
+
+// init
+load();
+document.getElementById("tDate").value = todayStr();
+document.getElementById("fDate").value = todayStr();
+fillPlaceSelect("tFrom"); fillPlaceSelect("tTo");
+updateOdo();
+</script>
+</body>
+</html>
