@@ -71,6 +71,11 @@
   .dot { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; }
   .dot-work { background: #FF671D; }
   .dot-pers { background: #00B2E3; }
+  .bar-fleet { background: #FF671D; }
+  .bar-persfuel { background: #3A3F45; }
+  .dot-fleet { background: #FF671D; }
+  .dot-persfuel { background: #3A3F45; }
+  .chart-gap { height: 18px; }
   .sum-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 16px; border-bottom: 1px dashed #E5E7E2; }
   .sum-row strong { font-variant-numeric: tabular-nums; }
 
@@ -349,12 +354,12 @@ function renderHistory() {
     `<div class="sum-row"><span>Fuel — personal</span><strong>$${personal.toFixed(2)}</strong></div>` +
     `<div class="sum-row"><span>Trips logged</span><strong>${trips.length}</strong></div>`;
 
-  const chart = document.getElementById("hChart");
-  if (!sp.total) {
-    chart.innerHTML = `<div class="chart-title">Work vs personal</div><p class="chart-empty">Log a trip to see the split.</p>`;
-  } else {
-    chart.innerHTML =
-      `<div class="chart-title">Work vs personal kms</div>` +
+  const totalFuel = fleet + personal;
+  const flPct = totalFuel ? (fleet / totalFuel * 100) : 0;
+  const pfPct = totalFuel ? (personal / totalFuel * 100) : 0;
+
+  const kmChart = sp.total
+    ? `<div class="chart-title">Work vs personal kms</div>` +
       `<div class="bar">` +
         (wPct > 0 ? `<div class="bar-seg bar-work" style="width:${wPct}%">${wPct >= 12 ? wPct.toFixed(0) + "%" : ""}</div>` : "") +
         (pPct > 0 ? `<div class="bar-seg bar-pers" style="width:${pPct}%">${pPct >= 12 ? pPct.toFixed(0) + "%" : ""}</div>` : "") +
@@ -362,8 +367,22 @@ function renderHistory() {
       `<div class="legend">` +
         `<span><i class="dot dot-work"></i>Work ${wPct.toFixed(0)}% · ${sp.work.toFixed(0)} km</span>` +
         `<span><i class="dot dot-pers"></i>Personal ${pPct.toFixed(0)}% · ${sp.pers.toFixed(0)} km</span>` +
-      `</div>`;
-  }
+      `</div>`
+    : `<div class="chart-title">Work vs personal kms</div><p class="chart-empty">Log a trip to see the split.</p>`;
+
+  const fuelChart = totalFuel
+    ? `<div class="chart-title">Fleet card vs personal fuel</div>` +
+      `<div class="bar">` +
+        (flPct > 0 ? `<div class="bar-seg bar-fleet" style="width:${flPct}%">${flPct >= 12 ? flPct.toFixed(0) + "%" : ""}</div>` : "") +
+        (pfPct > 0 ? `<div class="bar-seg bar-persfuel" style="width:${pfPct}%">${pfPct >= 12 ? pfPct.toFixed(0) + "%" : ""}</div>` : "") +
+      `</div>` +
+      `<div class="legend">` +
+        `<span><i class="dot dot-fleet"></i>Fleet card ${flPct.toFixed(0)}% · $${fleet.toFixed(2)}</span>` +
+        `<span><i class="dot dot-persfuel"></i>Personal ${pfPct.toFixed(0)}% · $${personal.toFixed(2)}</span>` +
+      `</div>`
+    : `<div class="chart-title">Fleet card vs personal fuel</div><p class="chart-empty">Log a fill-up to see the split.</p>`;
+
+  document.getElementById("hChart").innerHTML = kmChart + `<div class="chart-gap"></div>` + fuelChart;
   let html = "";
   if (!trips.length && !fuel.length) html = `<p class="empty">Nothing logged for ${fmtMonth(mk)} yet. Trips and fuel you save will show up here.</p>`;
   html += trips.map(t =>
