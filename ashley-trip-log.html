@@ -559,9 +559,11 @@ function buildCSV() {
   const personal = fuel.filter(f => f.payment === "personal").reduce((s,f) => s + f.amount, 0);
   const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
   const rows = [["Date","Entry","Work/Personal","From","To","KM","Odometer","Fuel $","Litres","Payment","Note / Location"]];
-  const combined = trips.map(t => [t.date,"Trip",(t.type || "work") === "work" ? "Work" : "Personal",t.from,t.to,t.km,t.odo ?? "","","","",t.note])
-    .concat(fuel.map(f => [f.date,"Fuel","","","","","",f.amount.toFixed(2),f.litres ?? "",f.payment === "fleet" ? "Fleet card" : "Personal",f.place]))
-    .sort((a,b) => a[0].localeCompare(b[0]));
+  const seq = r => Number(r.updated) || Number(r.id) || 0;
+  const combined = trips.map(t => ({ d: t.date, s: seq(t), row: [t.date,"Trip",(t.type || "work") === "work" ? "Work" : "Personal",t.from,t.to,t.km,t.odo ?? "","","","",t.note] }))
+    .concat(fuel.map(f => ({ d: f.date, s: seq(f), row: [f.date,"Fuel","","","","","",f.amount.toFixed(2),f.litres ?? "",f.payment === "fleet" ? "Fleet card" : "Personal",f.place] })))
+    .sort((a,b) => a.d.localeCompare(b.d) || a.s - b.s)
+    .map(x => x.row);
   const spc = splitKm(trips);
   rows.push(...combined, [],
     ["Work kms","","","","",spc.work.toFixed(1),"","","","",""],
