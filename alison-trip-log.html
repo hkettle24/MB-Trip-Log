@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Trip Log">
-<title>Trip Log — Alison Slade</title>
+<title>Trip Log — Alison</title>
 <link rel="manifest" href="manifest-alison.json">
 <link rel="icon" type="image/png" href="icon-alison-192.png">
 <link rel="apple-touch-icon" href="icon-alison-192.png">
@@ -20,9 +20,23 @@
 
   header { background: #00B2E3; color: #fff; padding: 20px 16px 18px; border-bottom: 5px solid #FF671D; }
   .header-inner { max-width: 560px; margin: 0 auto; }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .logo-chip { background: #fff; border-radius: 10px; padding: 7px 10px; flex-shrink: 0; }
+  .logo-chip img { display: block; height: 34px; width: auto; }
   .sign-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; letter-spacing: 2px; line-height: 1; }
   .sign-sub { font-size: 13px; opacity: .85; margin-top: 4px; font-weight: 500; }
   .odo-row { display: flex; gap: 16px; margin-top: 16px; }
+  .stat-line { display: flex; align-items: baseline; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .stat-tag { font-size: 11px; font-weight: 700; letter-spacing: .8px; padding: 3px 7px; border-radius: 4px; }
+  .stat-tag.work { background: rgba(255,255,255,.28); color: #fff; }
+  .stat-tag.personal { background: rgba(255,255,255,.28); color: #fff; }
+  .stat-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat-sep { opacity: .55; }
+  .stat-cap { font-size: 12px; opacity: .85; text-transform: uppercase; letter-spacing: .4px; }
+  .sync-line { margin-top: 14px; }
+  .sync-pill { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .3px; padding: 5px 12px; border-radius: 20px; background: rgba(255,255,255,.22); color: #fff; cursor: pointer; user-select: none; }
+  .sync-pill.syncing { background: rgba(255,255,255,.35); }
+  .sync-pill.error { background: #C62828; }
   .odo-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; display: block; }
   .odo-lbl { font-size: 12px; opacity: .85; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; display: block; }
   .odo-div { width: 1px; background: rgba(255,255,255,.35); }
@@ -48,14 +62,38 @@
   .save-btn { width: 100%; padding: 18px; font-size: 19px; font-weight: 700; color: #fff; background: #FF671D; border: none; border-radius: 12px; cursor: pointer; margin-top: 4px; }
   .save-btn.navy { background: #131414; margin-bottom: 6px; }
   .hint { font-size: 13px; color: #6A7078; margin-top: 10px; text-align: center; }
+  .calc-hint { font-size: 13px; color: #6A7078; margin-top: 7px; }
+  .gps-btn { margin-top: 8px; padding: 10px 14px; font-size: 15px; font-weight: 600; border-radius: 9px; border: 1.5px solid #C7CAC4; background: #fff; color: #00789E; cursor: pointer; }
+  .gps-btn:active { background: #F2F3F0; }
+  .gps-btn.busy { color: #6A7078; }
+  .link-btn { background: none; border: none; padding: 0; color: #00789E; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; }
+  .calc-hint.good { color: #00789E; font-weight: 600; }
+  .calc-hint.warn { color: #C0500B; font-weight: 600; }
   .empty { font-size: 15px; color: #6A7078; text-align: center; padding: 24px 8px; }
 
   .summary { background: #fff; border: 1.5px solid #D8DAD5; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
+  .chart-title { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: #3A3F45; margin-bottom: 10px; }
+  .chart-empty { font-size: 14px; color: #6A7078; }
+  .bar { display: flex; height: 34px; border-radius: 8px; overflow: hidden; background: #EDEEEA; }
+  .bar-seg { display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; min-width: 0; }
+  .bar-work { background: #FF671D; }
+  .bar-pers { background: #00B2E3; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 14px; color: #3A3F45; }
+  .dot { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; }
+  .dot-work { background: #FF671D; }
+  .dot-pers { background: #00B2E3; }
+  .bar-fleet { background: #FF671D; }
+  .bar-persfuel { background: #3A3F45; }
+  .dot-fleet { background: #FF671D; }
+  .dot-persfuel { background: #3A3F45; }
+  .chart-gap { height: 18px; }
   .sum-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 16px; border-bottom: 1px dashed #E5E7E2; }
   .sum-row strong { font-variant-numeric: tabular-nums; }
 
   .entry { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #DDDFDA; border-left: 6px solid #00B2E3; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
   .entry.fuel-fleet { border-left-color: #FF671D; }
+  .entry.trip-personal { border-left-color: #8A8F98; }
+  .mini-tag { background: #EDEEEA; color: #3A3F45; font-size: 11px; font-weight: 700; letter-spacing: .5px; padding: 2px 5px; border-radius: 3px; }
   .entry.fuel-personal { border-left-color: #8A8F98; }
   .entry .body { flex: 1; }
   .e-top { font-size: 13px; color: #6A7078; margin-bottom: 2px; }
@@ -71,12 +109,29 @@
 
 <header>
   <div class="header-inner">
-    <div class="sign-title">TRIP LOG</div>
-    <div class="sign-sub">Alison Slade · MBI Brands</div>
-    <div class="odo-row">
-      <div><span class="odo-num" id="odoKm">0</span><span class="odo-lbl">km this month</span></div>
-      <div class="odo-div"></div>
-      <div><span class="odo-num" id="odoFuel">$0</span><span class="odo-lbl">fleet card fuel</span></div>
+    <div class="title-row">
+      <div>
+        <div class="sign-title">TRIP LOG</div>
+        <div class="sign-sub">Alison · Mary Brown&#39;s Chicken</div>
+      </div>
+      <div class="logo-chip"><img src="data:image/png;base64,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" alt="Mary Brown's Chicken"></div>
+    </div>
+    <div class="sync-line">
+      <span class="sync-pill" id="syncPill" onclick="syncNow(true)">Sync</span>
+    </div>
+    <div class="stat-line">
+      <span class="stat-tag work">WORK</span>
+      <span class="stat-val" id="statWorkKm">0 km</span>
+      <span class="stat-sep">·</span>
+      <span class="stat-val" id="statFleetFuel">$0</span>
+      <span class="stat-cap">fleet card</span>
+    </div>
+    <div class="stat-line">
+      <span class="stat-tag personal">PERSONAL</span>
+      <span class="stat-val" id="statPersKm">0 km</span>
+      <span class="stat-sep">·</span>
+      <span class="stat-val" id="statPersFuel">$0</span>
+      <span class="stat-cap">personal</span>
     </div>
   </div>
 </header>
@@ -95,16 +150,35 @@
       <label>From</label>
       <select class="input" id="tFrom" onchange="toggleNew('tFrom')"></select>
       <input class="input hidden" id="tFromNew" placeholder="Type the place name" style="margin-top:8px">
+      <button class="gps-btn" onclick="useMyLocation('tFrom')">Use my location</button>
+      <p class="calc-hint" id="tFromGps"></p>
     </div>
     <div class="field">
       <label>To</label>
       <select class="input" id="tTo" onchange="toggleNew('tTo')"></select>
       <input class="input hidden" id="tToNew" placeholder="Type the place name" style="margin-top:8px">
+      <button class="gps-btn" onclick="useMyLocation('tTo')">Use my location</button>
+      <p class="calc-hint" id="tToGps"></p>
     </div>
-    <div class="field"><label>Kilometres driven</label><input class="input big-num" type="number" inputmode="decimal" placeholder="0" id="tKm"></div>
-    <div class="field"><label>Reason / what was picked up <span class="opt">(optional)</span></label><input class="input" id="tNote" placeholder="e.g. fryer parts for Carbonear"></div>
+    <div class="field">
+      <label>Trip type</label>
+      <div class="pay-row">
+        <button class="pay-btn fleet-on" id="typeWork" onclick="setTripType('work')">Work</button>
+        <button class="pay-btn" id="typePersonal" onclick="setTripType('personal')">Personal</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Odometer after trip <span class="opt">(optional)</span></label>
+      <input class="input big-num" type="number" inputmode="decimal" placeholder="0" id="tOdo" oninput="calcKmFromOdo()">
+      <p class="calc-hint" id="odoHint"></p>
+    </div>
+    <div class="field">
+      <label>Kilometres driven</label>
+      <input class="input big-num" type="number" inputmode="decimal" placeholder="0" id="tKm" oninput="kmTouched = true">
+    </div>
+    <div class="field"><label>Reason for trip <span class="opt">(optional)</span></label><input class="input" id="tNote" placeholder=""></div>
     <button class="save-btn" onclick="addTrip()">Save trip</button>
-    <p class="hint">After saving, the next trip starts from where this one ended.</p>
+    <p class="hint">Enter your odometer and the kms work themselves out. The next trip starts where this one ended.</p>
   </section>
 
   <!-- FUEL -->
@@ -126,6 +200,7 @@
   <!-- HISTORY -->
   <section id="paneHistory" class="hidden">
     <div class="field"><label>Month</label><select class="input" id="hMonth" onchange="renderHistory()"></select></div>
+    <div class="summary" id="hChart"></div>
     <div class="summary" id="hSummary"></div>
     <button class="save-btn navy" onclick="shareCSV()">Send / share CSV for this month</button>
     <button class="save-btn navy" onclick="downloadCSV()">Download CSV for this month</button>
@@ -144,8 +219,143 @@ const SEED_PLACES = [
   "1145 - 571 Torbay Rd","1155 - Bay Roberts","1162 - Carbonear","1167 - MUN"
 ];
 const KEY = "alisonTripLog";
-let data = { trips: [], fuel: [], places: SEED_PLACES.slice() };
+
+// ---- SYNC SETTINGS ----------------------------------------------------
+// Paste the /exec URL from your Apps Script deployment between the quotes.
+const SYNC_URL = "";
+// Must match SECRET in the Apps Script exactly.
+const SYNC_SECRET = "CHANGE-ME-TO-SOMETHING-ONLY-YOU-KNOW";
+// Whose log this is. Each person needs their own value.
+const SYNC_USER = "alison";
+// -----------------------------------------------------------------------
+
+// Known store coordinates. The app can learn more (see "Save this spot").
+const STORE_COORDS = {
+  "1010 - Avalon Mall":          [47.5607079, -52.7542858],
+  "1015 - 61 Torbay Rd":         [47.5859130, -52.7084380],
+  "1043 - Manuels":              [47.5190669, -52.9535449],
+  "1046 - Kelligrews":           [47.4967074, -53.0209912],
+  "1048 - Paradise":             [47.5346213, -52.8420854],
+  "1050 - Whitbourne":           [47.4485659, -53.5540544],
+  "1075 - Holyrood":             [47.3880418, -53.1236168],
+  "1085 - Gander":               [48.9511582, -54.6184375],
+  "1088 - Botwood":              [49.1485781, -55.3462486],
+  "1120 - Torbay":               [47.6570410, -52.7336950],
+  "1135 - Bonavista":            [48.6398854, -53.1034493],
+  "1140 - Freshwater Rd":        [47.5618622, -52.7458514],
+  "1145 - 571 Torbay Rd":        [47.6125773, -52.7231544],
+  "1155 - Bay Roberts":          [47.5780984, -53.2813303],
+  "1162 - Carbonear":            [47.7254361, -53.2395355],
+  "1167 - MUN":                  [47.5732184, -52.7352991]
+};
+
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const now = () => Date.now();
+let data = { trips: [], fuel: [], places: SEED_PLACES.slice(), coords: {} };
 let payMode = "fleet";
+let tripType = "work";
+let kmTouched = false;
+let lastFix = null;
+
+// Straight-line distance in km between two lat/lng points
+function distanceKm(a, b) {
+  const R = 6371, rad = d => d * Math.PI / 180;
+  const dLat = rad(b[0] - a[0]), dLng = rad(b[1] - a[1]);
+  const s = Math.sin(dLat / 2) ** 2 +
+            Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+// Every place the app knows coordinates for, built-in plus learned
+function knownCoords() {
+  return Object.assign({}, STORE_COORDS, data.coords || {});
+}
+
+function nearestPlace(fix) {
+  const all = knownCoords();
+  let best = null;
+  for (const name in all) {
+    const d = distanceKm(fix, all[name]);
+    if (!best || d < best.d) best = { name, d };
+  }
+  return best;
+}
+
+function useMyLocation(fieldId) {
+  const hint = document.getElementById(fieldId + "Gps");
+  if (!navigator.geolocation) { hint.textContent = "This phone won't share its location."; hint.className = "calc-hint warn"; return; }
+  hint.textContent = "Finding you…";
+  hint.className = "calc-hint";
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const fix = [pos.coords.latitude, pos.coords.longitude];
+    lastFix = fix;
+    const near = nearestPlace(fix);
+    if (near && near.d <= 1.5) {
+      const sel = document.getElementById(fieldId);
+      fillPlaceSelect(fieldId, near.name);
+      sel.value = near.name;
+      document.getElementById(fieldId + "New").classList.add("hidden");
+      hint.textContent = "You're at " + near.name + ".";
+      hint.className = "calc-hint good";
+    } else {
+      const howFar = near ? " Closest known spot is " + near.name + ", " + near.d.toFixed(1) + " km away." : "";
+      hint.innerHTML = "No saved place here." + howFar +
+        ' <button class="link-btn" onclick="saveThisSpot(\'' + fieldId + '\')">Save this spot as the place selected above</button>';
+      hint.className = "calc-hint";
+    }
+  }, err => {
+    hint.textContent = err.code === 1
+      ? "Location is blocked. Allow it for this site in your browser settings."
+      : "Couldn't get a location fix. Try again in a moment.";
+    hint.className = "calc-hint warn";
+  }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
+}
+
+function saveThisSpot(fieldId) {
+  const hint = document.getElementById(fieldId + "Gps");
+  if (!lastFix) { hint.textContent = "Tap Use my location first."; hint.className = "calc-hint warn"; return; }
+  const name = resolvePlace(fieldId);
+  if (!name) { hint.textContent = "Pick or type a place above first, then save the spot."; hint.className = "calc-hint warn"; return; }
+  data.coords = data.coords || {};
+  data.coords[name] = lastFix;
+  if (!data.places.includes(name)) data.places.push(name);
+  save();
+  fillPlaceSelect("tFrom"); fillPlaceSelect("tTo");
+  document.getElementById(fieldId).value = name;
+  hint.textContent = "Saved. The app will recognise " + name + " from now on.";
+  hint.className = "calc-hint good";
+}
+
+// Highest odometer reading recorded so far
+function lastOdometer() {
+  const readings = liveTrips().map(t => t.odo).filter(v => v);
+  return readings.length ? Math.max(...readings) : null;
+}
+
+function calcKmFromOdo() {
+  const hint = document.getElementById("odoHint");
+  const kmBox = document.getElementById("tKm");
+  const odo = parseFloat(document.getElementById("tOdo").value);
+  const last = lastOdometer();
+
+  if (!odo) { hint.textContent = ""; hint.className = "calc-hint"; return; }
+
+  if (last === null) {
+    hint.textContent = "First reading saved as your starting point. Enter this trip's kms below; after this the app works them out for you.";
+    hint.className = "calc-hint";
+    return;
+  }
+  if (odo <= last) {
+    hint.textContent = "That's lower than your last reading of " + last.toLocaleString() + " km. Check the number.";
+    hint.className = "calc-hint warn";
+    return;
+  }
+  const diff = Math.round((odo - last) * 10) / 10;
+  hint.textContent = diff.toLocaleString() + " km since your last reading of " + last.toLocaleString() + ".";
+  hint.className = "calc-hint good";
+  if (!kmTouched) kmBox.value = diff;
+}
 let toastTimer = null;
 
 function load() {
@@ -153,9 +363,95 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const p = JSON.parse(raw);
-      data = { trips: p.trips || [], fuel: p.fuel || [], places: p.places || SEED_PLACES.slice() };
+      data = { trips: p.trips || [], fuel: p.fuel || [], places: p.places || SEED_PLACES.slice(), coords: p.coords || {} };
     }
   } catch (e) {}
+  // Bring older entries up to the synced format
+  let changed = false;
+  ["trips", "fuel"].forEach(k => data[k].forEach(r => {
+    if (r.id === undefined || typeof r.id === "number") { r.id = String(r.id ?? newId()); changed = true; }
+    if (!r.updated) { r.updated = now(); changed = true; }
+    if (r.deleted === undefined) { r.deleted = false; changed = true; }
+  }));
+  if (changed) save();
+}
+
+// Live (non-deleted) records
+const liveTrips = () => data.trips.filter(t => !t.deleted);
+const liveFuel = () => data.fuel.filter(f => !f.deleted);
+
+// ---- SYNC -------------------------------------------------------------
+let syncing = false;
+
+function setSyncPill(text, cls) {
+  const el = document.getElementById("syncPill");
+  el.textContent = text;
+  el.className = "sync-pill" + (cls ? " " + cls : "");
+}
+
+function toRecords() {
+  return data.trips.map(t => ({
+    id: t.id, kind: "trip", date: t.date, from: t.from, to: t.to,
+    km: t.km, odo: t.odo ?? null, type: t.type || "work",
+    amount: null, litres: null, payment: "", place: "",
+    note: t.note || "", updated: t.updated, deleted: !!t.deleted
+  })).concat(data.fuel.map(f => ({
+    id: f.id, kind: "fuel", date: f.date, from: "", to: "",
+    km: null, odo: null, type: "",
+    amount: f.amount, litres: f.litres ?? null, payment: f.payment, place: f.place || "",
+    note: "", updated: f.updated, deleted: !!f.deleted
+  })));
+}
+
+function fromRecords(records) {
+  const trips = [], fuel = [];
+  records.forEach(r => {
+    if (r.kind === "trip") {
+      trips.push({ id: String(r.id), date: String(r.date), from: r.from, to: r.to,
+        km: Number(r.km) || 0, odo: r.odo ? Number(r.odo) : null,
+        type: r.type || "work", note: r.note || "",
+        updated: Number(r.updated) || 0, deleted: !!r.deleted });
+    } else if (r.kind === "fuel") {
+      fuel.push({ id: String(r.id), date: String(r.date), amount: Number(r.amount) || 0,
+        litres: r.litres ? Number(r.litres) : null, payment: r.payment || "fleet",
+        place: r.place || "", updated: Number(r.updated) || 0, deleted: !!r.deleted });
+    }
+  });
+  return { trips, fuel };
+}
+
+async function syncNow(manual) {
+  if (!SYNC_URL) { if (manual) toast("Sync is not set up yet"); return; }
+  if (syncing) return;
+  syncing = true;
+  setSyncPill("Syncing…", "syncing");
+  try {
+    const res = await fetch(SYNC_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ secret: SYNC_SECRET, user: SYNC_USER, records: toRecords() })
+    });
+    const out = await res.json();
+    if (!out.ok) throw new Error(out.error || "sync failed");
+    const merged = fromRecords(out.records || []);
+    // Rebuild the place list from every trip that came back
+    let places = SEED_PLACES.slice();
+    merged.trips.forEach(t => { [t.from, t.to].forEach(p => { if (p && !places.includes(p)) places.push(p); }); });
+    data.places.forEach(p => { if (!places.includes(p)) places.push(p); });
+    data = { trips: merged.trips, fuel: merged.fuel, places, coords: data.coords || {} };
+    save();
+    fillPlaceSelect("tFrom"); fillPlaceSelect("tTo");
+    updateStats();
+    calcKmFromOdo();
+    if (!document.getElementById("paneHistory").classList.contains("hidden")) { fillMonths(); renderHistory(); }
+    setSyncPill("Synced " + new Date().toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit" }));
+    if (manual) toast("Up to date on all your devices");
+  } catch (e) {
+    setSyncPill("Not synced - tap to retry", "error");
+    if (manual) toast("Couldn't reach the sync server");
+  } finally {
+    syncing = false;
+  }
 }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(data)); }
@@ -198,6 +494,12 @@ function setTab(t) {
   });
   if (t === "history") { fillMonths(); renderHistory(); }
 }
+function setTripType(t) {
+  tripType = t;
+  document.getElementById("typeWork").className = "pay-btn" + (t === "work" ? " fleet-on" : "");
+  document.getElementById("typePersonal").className = "pay-btn" + (t === "personal" ? " personal-on" : "");
+}
+
 function setPay(m) {
   payMode = m;
   document.getElementById("payFleet").className = "pay-btn" + (m==="fleet" ? " fleet-on" : "");
@@ -211,15 +513,22 @@ function addTrip() {
   if (!from || !to) { toast("Pick where you started and ended"); return; }
   if (!km || km <= 0) { toast("Enter the kms driven"); return; }
   [from, to].forEach(p => { if (!data.places.includes(p)) data.places.push(p); });
-  data.trips.push({ id: Date.now(), date, from, to, km, note: document.getElementById("tNote").value.trim() });
+  const odo = parseFloat(document.getElementById("tOdo").value) || null;
+  data.trips.push({ id: newId(), date, from, to, km, odo, type: tripType,
+    note: document.getElementById("tNote").value.trim(), updated: now(), deleted: false });
   save();
   fillPlaceSelect("tFrom", from === to ? to : to); // chain: next leg starts where this ended
   document.getElementById("tFromNew").value = ""; document.getElementById("tFromNew").classList.add("hidden");
   fillPlaceSelect("tTo", ""); document.getElementById("tToNew").value = ""; document.getElementById("tToNew").classList.add("hidden");
   document.getElementById("tFrom").value = to;
-  document.getElementById("tKm").value = ""; document.getElementById("tNote").value = "";
-  updateOdo();
+  document.getElementById("tKm").value = ""; document.getElementById("tOdo").value = ""; document.getElementById("tNote").value = "";
+  document.getElementById("odoHint").textContent = ""; document.getElementById("odoHint").className = "calc-hint";
+  ["tFromGps","tToGps"].forEach(i => { const h = document.getElementById(i); h.textContent = ""; h.className = "calc-hint"; });
+  kmTouched = false;
+  setTripType("work");
+  updateStats();
   toast("Saved: " + from + " → " + to + ", " + km + " km");
+  syncNow();
 }
 
 function addFuel() {
@@ -227,34 +536,47 @@ function addFuel() {
   const date = document.getElementById("fDate").value || todayStr();
   if (!amt || amt <= 0) { toast("Enter the dollar amount"); return; }
   data.fuel.push({
-    id: Date.now(), date, amount: amt,
+    id: newId(), date, amount: amt,
     litres: parseFloat(document.getElementById("fLitres").value) || null,
-    payment: payMode, place: document.getElementById("fPlace").value.trim()
+    payment: payMode, place: document.getElementById("fPlace").value.trim(),
+    updated: now(), deleted: false
   });
   save();
   document.getElementById("fAmt").value = ""; document.getElementById("fLitres").value = ""; document.getElementById("fPlace").value = "";
-  updateOdo();
+  updateStats();
   toast("Saved: $" + amt.toFixed(2) + (payMode === "fleet" ? " on fleet card" : " personal"));
+  syncNow();
 }
 
 function delEntry(kind, id) {
   if (!confirm("Delete this entry?")) return;
-  data[kind] = data[kind].filter(e => e.id !== id);
-  save(); updateOdo(); renderHistory();
+  const rec = data[kind].find(e => String(e.id) === String(id));
+  if (rec) { rec.deleted = true; rec.updated = now(); }
+  save(); updateStats(); renderHistory(); syncNow();
 }
 
-function updateOdo() {
+function splitKm(trips) {
+  const work = trips.filter(t => (t.type || "work") === "work").reduce((s,t) => s + t.km, 0);
+  const pers = trips.filter(t => t.type === "personal").reduce((s,t) => s + t.km, 0);
+  return { work, pers, total: work + pers };
+}
+
+function updateStats() {
   const cm = monthKey(todayStr());
-  const km = data.trips.filter(t => monthKey(t.date) === cm).reduce((s,t) => s + t.km, 0);
-  const fl = data.fuel.filter(f => monthKey(f.date) === cm && f.payment === "fleet").reduce((s,f) => s + f.amount, 0);
-  document.getElementById("odoKm").textContent = km.toFixed(0);
-  document.getElementById("odoFuel").textContent = "$" + fl.toFixed(0);
+  const sp = splitKm(liveTrips().filter(t => monthKey(t.date) === cm));
+  const mf = liveFuel().filter(f => monthKey(f.date) === cm);
+  const fleet = mf.filter(f => f.payment === "fleet").reduce((s,f) => s + f.amount, 0);
+  const persF = mf.filter(f => f.payment === "personal").reduce((s,f) => s + f.amount, 0);
+  document.getElementById("statWorkKm").textContent = sp.work.toFixed(0) + " km";
+  document.getElementById("statFleetFuel").textContent = "$" + fleet.toFixed(0);
+  document.getElementById("statPersKm").textContent = sp.pers.toFixed(0) + " km";
+  document.getElementById("statPersFuel").textContent = "$" + persF.toFixed(0);
 }
 
 function fillMonths() {
   const sel = document.getElementById("hMonth");
   const cur = sel.value;
-  let months = Array.from(new Set(data.trips.concat(data.fuel).map(e => monthKey(e.date)))).sort().reverse();
+  let months = Array.from(new Set(liveTrips().concat(liveFuel()).map(e => monthKey(e.date)))).sort().reverse();
   if (!months.length) months = [monthKey(todayStr())];
   sel.innerHTML = months.map(m => `<option value="${m}">${fmtMonth(m)}</option>`).join("");
   sel.value = months.includes(cur) ? cur : months[0];
@@ -262,37 +584,71 @@ function fillMonths() {
 
 function monthData() {
   const mk = document.getElementById("hMonth").value;
-  const byDate = (a,b) => b.date.localeCompare(a.date) || b.id - a.id;
+  const byDate = (a,b) => b.date.localeCompare(a.date) || (b.updated || 0) - (a.updated || 0);
   return {
     mk,
-    trips: data.trips.filter(t => monthKey(t.date) === mk).sort(byDate),
-    fuel: data.fuel.filter(f => monthKey(f.date) === mk).sort(byDate)
+    trips: liveTrips().filter(t => monthKey(t.date) === mk).sort(byDate),
+    fuel: liveFuel().filter(f => monthKey(f.date) === mk).sort(byDate)
   };
 }
 
 function renderHistory() {
   const { mk, trips, fuel } = monthData();
-  const km = trips.reduce((s,t) => s + t.km, 0);
   const fleet = fuel.filter(f => f.payment === "fleet").reduce((s,f) => s + f.amount, 0);
   const personal = fuel.filter(f => f.payment === "personal").reduce((s,f) => s + f.amount, 0);
+  const sp = splitKm(trips);
+  const wPct = sp.total ? (sp.work / sp.total * 100) : 0;
+  const pPct = sp.total ? (sp.pers / sp.total * 100) : 0;
   document.getElementById("hSummary").innerHTML =
-    `<div class="sum-row"><span>Total driven</span><strong>${km.toFixed(1)} km</strong></div>` +
+    `<div class="sum-row"><span>Work kms</span><strong>${sp.work.toFixed(1)} km</strong></div>` +
+    `<div class="sum-row"><span>Personal kms</span><strong>${sp.pers.toFixed(1)} km</strong></div>` +
+    `<div class="sum-row"><span>Total driven</span><strong>${sp.total.toFixed(1)} km</strong></div>` +
     `<div class="sum-row"><span>Fuel — fleet card</span><strong>$${fleet.toFixed(2)}</strong></div>` +
     `<div class="sum-row"><span>Fuel — personal</span><strong>$${personal.toFixed(2)}</strong></div>` +
     `<div class="sum-row"><span>Trips logged</span><strong>${trips.length}</strong></div>`;
+
+  const totalFuel = fleet + personal;
+  const flPct = totalFuel ? (fleet / totalFuel * 100) : 0;
+  const pfPct = totalFuel ? (personal / totalFuel * 100) : 0;
+
+  const kmChart = sp.total
+    ? `<div class="chart-title">Work vs personal kms</div>` +
+      `<div class="bar">` +
+        (wPct > 0 ? `<div class="bar-seg bar-work" style="width:${wPct}%">${wPct >= 12 ? wPct.toFixed(0) + "%" : ""}</div>` : "") +
+        (pPct > 0 ? `<div class="bar-seg bar-pers" style="width:${pPct}%">${pPct >= 12 ? pPct.toFixed(0) + "%" : ""}</div>` : "") +
+      `</div>` +
+      `<div class="legend">` +
+        `<span><i class="dot dot-work"></i>Work ${wPct.toFixed(0)}% · ${sp.work.toFixed(0)} km</span>` +
+        `<span><i class="dot dot-pers"></i>Personal ${pPct.toFixed(0)}% · ${sp.pers.toFixed(0)} km</span>` +
+      `</div>`
+    : `<div class="chart-title">Work vs personal kms</div><p class="chart-empty">Log a trip to see the split.</p>`;
+
+  const fuelChart = totalFuel
+    ? `<div class="chart-title">Fleet card vs personal fuel</div>` +
+      `<div class="bar">` +
+        (flPct > 0 ? `<div class="bar-seg bar-fleet" style="width:${flPct}%">${flPct >= 12 ? flPct.toFixed(0) + "%" : ""}</div>` : "") +
+        (pfPct > 0 ? `<div class="bar-seg bar-persfuel" style="width:${pfPct}%">${pfPct >= 12 ? pfPct.toFixed(0) + "%" : ""}</div>` : "") +
+      `</div>` +
+      `<div class="legend">` +
+        `<span><i class="dot dot-fleet"></i>Fleet card ${flPct.toFixed(0)}% · $${fleet.toFixed(2)}</span>` +
+        `<span><i class="dot dot-persfuel"></i>Personal ${pfPct.toFixed(0)}% · $${personal.toFixed(2)}</span>` +
+      `</div>`
+    : `<div class="chart-title">Fleet card vs personal fuel</div><p class="chart-empty">Log a fill-up to see the split.</p>`;
+
+  document.getElementById("hChart").innerHTML = kmChart + `<div class="chart-gap"></div>` + fuelChart;
   let html = "";
   if (!trips.length && !fuel.length) html = `<p class="empty">Nothing logged for ${fmtMonth(mk)} yet. Trips and fuel you save will show up here.</p>`;
   html += trips.map(t =>
-    `<div class="entry"><div class="body"><div class="e-top">${fmtDate(t.date)} · <strong>${t.km} km</strong></div>` +
+    `<div class="entry${t.type === "personal" ? " trip-personal" : ""}"><div class="body"><div class="e-top">${fmtDate(t.date)} · <strong>${t.km} km</strong>${t.type === "personal" ? ' · <span class="mini-tag">PERSONAL</span>' : ""}${t.odo ? " · odometer " + t.odo.toLocaleString() : ""}</div>` +
     `<div class="e-main">${esc(t.from)} → ${esc(t.to)}</div>` +
     (t.note ? `<div class="e-note">${esc(t.note)}</div>` : "") +
-    `</div><button class="del" onclick="delEntry('trips',${t.id})" aria-label="Delete trip">✕</button></div>`).join("");
+    `</div><button class="del" onclick="delEntry('trips','${t.id}')" aria-label="Delete trip">✕</button></div>`).join("");
   html += fuel.map(f =>
     `<div class="entry ${f.payment === "fleet" ? "fuel-fleet" : "fuel-personal"}"><div class="body">` +
     `<div class="e-top">${fmtDate(f.date)} · Fuel</div>` +
     `<div class="e-main">$${f.amount.toFixed(2)}${f.litres ? " · " + f.litres + " L" : ""} · ${f.payment === "fleet" ? "Fleet card" : "Personal"}</div>` +
     (f.place ? `<div class="e-note">${esc(f.place)}</div>` : "") +
-    `</div><button class="del" onclick="delEntry('fuel',${f.id})" aria-label="Delete fuel entry">✕</button></div>`).join("");
+    `</div><button class="del" onclick="delEntry('fuel','${f.id}')" aria-label="Delete fuel entry">✕</button></div>`).join("");
   document.getElementById("hList").innerHTML = html;
 }
 
@@ -302,12 +658,17 @@ function buildCSV() {
   const fleet = fuel.filter(f => f.payment === "fleet").reduce((s,f) => s + f.amount, 0);
   const personal = fuel.filter(f => f.payment === "personal").reduce((s,f) => s + f.amount, 0);
   const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-  const rows = [["Date","Type","From","To","KM","Fuel $","Litres","Payment","Note / Location"]];
-  const combined = trips.map(t => [t.date,"Trip",t.from,t.to,t.km,"","","",t.note])
-    .concat(fuel.map(f => [f.date,"Fuel","","","",f.amount.toFixed(2),f.litres ?? "",f.payment === "fleet" ? "Fleet card" : "Personal",f.place]))
-    .sort((a,b) => a[0].localeCompare(b[0]));
+  const rows = [["Date","Entry","Work/Personal","From","To","KM","Odometer","Fuel $","Litres","Payment","Note / Location"]];
+  const seq = r => Number(r.updated) || Number(r.id) || 0;
+  const combined = trips.map(t => ({ d: t.date, s: seq(t), row: [t.date,"Trip",(t.type || "work") === "work" ? "Work" : "Personal",t.from,t.to,t.km,t.odo ?? "","","","",t.note] }))
+    .concat(fuel.map(f => ({ d: f.date, s: seq(f), row: [f.date,"Fuel","","","","","",f.amount.toFixed(2),f.litres ?? "",f.payment === "fleet" ? "Fleet card" : "Personal",f.place] })))
+    .sort((a,b) => a.d.localeCompare(b.d) || a.s - b.s)
+    .map(x => x.row);
+  const spc = splitKm(trips);
   rows.push(...combined, [],
-    ["Totals","","","",km.toFixed(1),(fleet+personal).toFixed(2),"","Fleet: $"+fleet.toFixed(2)+" / Personal: $"+personal.toFixed(2),""]);
+    ["Work kms","","","","",spc.work.toFixed(1),"","","","",""],
+    ["Personal kms","","","","",spc.pers.toFixed(1),"","","","",""],
+    ["Totals","","","","",spc.total.toFixed(1),"",(fleet+personal).toFixed(2),"","Fleet: $"+fleet.toFixed(2)+" / Personal: $"+personal.toFixed(2),""]);
   return { mk, csv: rows.map(r => r.map(q).join(",")).join("\n") };
 }
 
@@ -336,7 +697,11 @@ load();
 document.getElementById("tDate").value = todayStr();
 document.getElementById("fDate").value = todayStr();
 fillPlaceSelect("tFrom"); fillPlaceSelect("tTo");
-updateOdo();
+updateStats();
+setSyncPill(SYNC_URL ? "Sync" : "Sync off");
+syncNow();
+window.addEventListener("online", () => syncNow());
+document.addEventListener("visibilitychange", () => { if (!document.hidden) syncNow(); });
 </script>
 </body>
 </html>
