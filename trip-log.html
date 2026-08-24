@@ -102,7 +102,7 @@
       <input class="input hidden" id="tToNew" placeholder="Type the place name" style="margin-top:8px">
     </div>
     <div class="field"><label>Kilometres driven</label><input class="input big-num" type="number" inputmode="decimal" placeholder="0" id="tKm"></div>
-    <div class="field"><label>Reason / what was picked up <span class="opt">(optional)</span></label><input class="input" id="tNote" placeholder="e.g. fryer parts for Carbonear"></div>
+    <div class="field"><label>Reason for trip <span class="opt">(optional)</span></label><input class="input" id="tNote" placeholder=""></div>
     <button class="save-btn" onclick="addTrip()">Save trip</button>
     <p class="hint">After saving, the next trip starts from where this one ended.</p>
   </section>
@@ -303,9 +303,11 @@ function buildCSV() {
   const personal = fuel.filter(f => f.payment === "personal").reduce((s,f) => s + f.amount, 0);
   const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
   const rows = [["Date","Type","From","To","KM","Fuel $","Litres","Payment","Note / Location"]];
-  const combined = trips.map(t => [t.date,"Trip",t.from,t.to,t.km,"","","",t.note])
-    .concat(fuel.map(f => [f.date,"Fuel","","","",f.amount.toFixed(2),f.litres ?? "",f.payment === "fleet" ? "Fleet card" : "Personal",f.place]))
-    .sort((a,b) => a[0].localeCompare(b[0]));
+  const seq = r => Number(r.updated) || Number(r.id) || 0;
+  const combined = trips.map(t => ({ d: t.date, s: seq(t), row: [t.date,"Trip",t.from,t.to,t.km,"","","",t.note] }))
+    .concat(fuel.map(f => ({ d: f.date, s: seq(f), row: [f.date,"Fuel","","","",f.amount.toFixed(2),f.litres ?? "",f.payment === "fleet" ? "Fleet card" : "Personal",f.place] })))
+    .sort((a,b) => a.d.localeCompare(b.d) || a.s - b.s)
+    .map(x => x.row);
   rows.push(...combined, [],
     ["Totals","","","",km.toFixed(1),(fleet+personal).toFixed(2),"","Fleet: $"+fleet.toFixed(2)+" / Personal: $"+personal.toFixed(2),""]);
   return { mk, csv: rows.map(r => r.map(q).join(",")).join("\n") };
