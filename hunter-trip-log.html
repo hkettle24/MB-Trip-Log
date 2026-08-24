@@ -63,6 +63,10 @@
   .save-btn.navy { background: #131414; margin-bottom: 6px; }
   .hint { font-size: 13px; color: #6A7078; margin-top: 10px; text-align: center; }
   .calc-hint { font-size: 13px; color: #6A7078; margin-top: 7px; }
+  .gps-btn { margin-top: 8px; padding: 10px 14px; font-size: 15px; font-weight: 600; border-radius: 9px; border: 1.5px solid #C7CAC4; background: #fff; color: #00789E; cursor: pointer; }
+  .gps-btn:active { background: #F2F3F0; }
+  .gps-btn.busy { color: #6A7078; }
+  .link-btn { background: none; border: none; padding: 0; color: #00789E; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; }
   .calc-hint.good { color: #00789E; font-weight: 600; }
   .calc-hint.warn { color: #C0500B; font-weight: 600; }
   .empty { font-size: 15px; color: #6A7078; text-align: center; padding: 24px 8px; }
@@ -146,11 +150,15 @@
       <label>From</label>
       <select class="input" id="tFrom" onchange="toggleNew('tFrom')"></select>
       <input class="input hidden" id="tFromNew" placeholder="Type the place name" style="margin-top:8px">
+      <button class="gps-btn" onclick="useMyLocation('tFrom')">Use my location</button>
+      <p class="calc-hint" id="tFromGps"></p>
     </div>
     <div class="field">
       <label>To</label>
       <select class="input" id="tTo" onchange="toggleNew('tTo')"></select>
       <input class="input hidden" id="tToNew" placeholder="Type the place name" style="margin-top:8px">
+      <button class="gps-btn" onclick="useMyLocation('tTo')">Use my location</button>
+      <p class="calc-hint" id="tToGps"></p>
     </div>
     <div class="field">
       <label>Trip type</label>
@@ -221,12 +229,103 @@ const SYNC_SECRET = "CHANGE-ME-TO-SOMETHING-ONLY-YOU-KNOW";
 const SYNC_USER = "hunter";
 // -----------------------------------------------------------------------
 
+// Known store coordinates. The app can learn more (see "Save this spot").
+const STORE_COORDS = {
+  "1010 - Avalon Mall":          [47.5607079, -52.7542858],
+  "1015 - 61 Torbay Rd":         [47.5859130, -52.7084380],
+  "1043 - Manuels":              [47.5190669, -52.9535449],
+  "1046 - Kelligrews":           [47.4967074, -53.0209912],
+  "1048 - Paradise":             [47.5346213, -52.8420854],
+  "1050 - Whitbourne":           [47.4485659, -53.5540544],
+  "1075 - Holyrood":             [47.3880418, -53.1236168],
+  "1085 - Gander":               [48.9511582, -54.6184375],
+  "1088 - Botwood":              [49.1485781, -55.3462486],
+  "1120 - Torbay":               [47.6570410, -52.7336950],
+  "1135 - Bonavista":            [48.6398854, -53.1034493],
+  "1140 - Freshwater Rd":        [47.5618622, -52.7458514],
+  "1145 - 571 Torbay Rd":        [47.6125773, -52.7231544],
+  "1155 - Bay Roberts":          [47.5780984, -53.2813303],
+  "1162 - Carbonear":            [47.7254361, -53.2395355],
+  "1167 - MUN":                  [47.5732184, -52.7352991]
+};
+
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const now = () => Date.now();
-let data = { trips: [], fuel: [], places: SEED_PLACES.slice() };
+let data = { trips: [], fuel: [], places: SEED_PLACES.slice(), coords: {} };
 let payMode = "fleet";
 let tripType = "work";
 let kmTouched = false;
+let lastFix = null;
+
+// Straight-line distance in km between two lat/lng points
+function distanceKm(a, b) {
+  const R = 6371, rad = d => d * Math.PI / 180;
+  const dLat = rad(b[0] - a[0]), dLng = rad(b[1] - a[1]);
+  const s = Math.sin(dLat / 2) ** 2 +
+            Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+// Every place the app knows coordinates for, built-in plus learned
+function knownCoords() {
+  return Object.assign({}, STORE_COORDS, data.coords || {});
+}
+
+function nearestPlace(fix) {
+  const all = knownCoords();
+  let best = null;
+  for (const name in all) {
+    const d = distanceKm(fix, all[name]);
+    if (!best || d < best.d) best = { name, d };
+  }
+  return best;
+}
+
+function useMyLocation(fieldId) {
+  const hint = document.getElementById(fieldId + "Gps");
+  if (!navigator.geolocation) { hint.textContent = "This phone won't share its location."; hint.className = "calc-hint warn"; return; }
+  hint.textContent = "Finding you…";
+  hint.className = "calc-hint";
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const fix = [pos.coords.latitude, pos.coords.longitude];
+    lastFix = fix;
+    const near = nearestPlace(fix);
+    if (near && near.d <= 1.5) {
+      const sel = document.getElementById(fieldId);
+      fillPlaceSelect(fieldId, near.name);
+      sel.value = near.name;
+      document.getElementById(fieldId + "New").classList.add("hidden");
+      hint.textContent = "You're at " + near.name + ".";
+      hint.className = "calc-hint good";
+    } else {
+      const howFar = near ? " Closest known spot is " + near.name + ", " + near.d.toFixed(1) + " km away." : "";
+      hint.innerHTML = "No saved place here." + howFar +
+        ' <button class="link-btn" onclick="saveThisSpot(\'' + fieldId + '\')">Save this spot as the place selected above</button>';
+      hint.className = "calc-hint";
+    }
+  }, err => {
+    hint.textContent = err.code === 1
+      ? "Location is blocked. Allow it for this site in your browser settings."
+      : "Couldn't get a location fix. Try again in a moment.";
+    hint.className = "calc-hint warn";
+  }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
+}
+
+function saveThisSpot(fieldId) {
+  const hint = document.getElementById(fieldId + "Gps");
+  if (!lastFix) { hint.textContent = "Tap Use my location first."; hint.className = "calc-hint warn"; return; }
+  const name = resolvePlace(fieldId);
+  if (!name) { hint.textContent = "Pick or type a place above first, then save the spot."; hint.className = "calc-hint warn"; return; }
+  data.coords = data.coords || {};
+  data.coords[name] = lastFix;
+  if (!data.places.includes(name)) data.places.push(name);
+  save();
+  fillPlaceSelect("tFrom"); fillPlaceSelect("tTo");
+  document.getElementById(fieldId).value = name;
+  hint.textContent = "Saved. The app will recognise " + name + " from now on.";
+  hint.className = "calc-hint good";
+}
 
 // Highest odometer reading recorded so far
 function lastOdometer() {
@@ -264,7 +363,7 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const p = JSON.parse(raw);
-      data = { trips: p.trips || [], fuel: p.fuel || [], places: p.places || SEED_PLACES.slice() };
+      data = { trips: p.trips || [], fuel: p.fuel || [], places: p.places || SEED_PLACES.slice(), coords: p.coords || {} };
     }
   } catch (e) {}
   // Bring older entries up to the synced format
@@ -339,7 +438,7 @@ async function syncNow(manual) {
     let places = SEED_PLACES.slice();
     merged.trips.forEach(t => { [t.from, t.to].forEach(p => { if (p && !places.includes(p)) places.push(p); }); });
     data.places.forEach(p => { if (!places.includes(p)) places.push(p); });
-    data = { trips: merged.trips, fuel: merged.fuel, places };
+    data = { trips: merged.trips, fuel: merged.fuel, places, coords: data.coords || {} };
     save();
     fillPlaceSelect("tFrom"); fillPlaceSelect("tTo");
     updateStats();
@@ -424,6 +523,7 @@ function addTrip() {
   document.getElementById("tFrom").value = to;
   document.getElementById("tKm").value = ""; document.getElementById("tOdo").value = ""; document.getElementById("tNote").value = "";
   document.getElementById("odoHint").textContent = ""; document.getElementById("odoHint").className = "calc-hint";
+  ["tFromGps","tToGps"].forEach(i => { const h = document.getElementById(i); h.textContent = ""; h.className = "calc-hint"; });
   kmTouched = false;
   setTripType("work");
   updateStats();
